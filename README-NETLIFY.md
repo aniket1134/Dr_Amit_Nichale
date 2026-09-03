@@ -1,5 +1,39 @@
 # Deploying this on Netlify (with a real database)
 
+## Fix applied in this version
+The previous zip 404'd on every `/api/...` call even after a successful
+deploy. Cause: `netlify/functions/api.js` was written using
+`exports.handler` / `exports.config`, which is the **v1** (older,
+AWS-Lambda-style) Netlify Functions convention. But the code itself used the
+**v2** Request/Response API (`req.url`, `req.headers.get()`, returning a
+`Response`). That mismatch meant Netlify never registered the `/api/*` path
+route at all, so every call to it fell through to Netlify's generic 404
+page — exactly what you saw on the appointment and feedback pages.
+
+Fixed by converting `api.js` and `lib.js` to proper ES modules
+(`export default` / `export const config = { path: '/api/*' }`), and adding
+`"type": "module"` to `package.json` so Node treats them as ESM. The old
+unused `server.js` / `db.js` / `utils.js` (CommonJS, no longer used) were
+removed since they'd conflict with `"type": "module"` otherwise.
+
+## A second fix (from your build log)
+After the first fix, your build log showed the function bundling itself
+failed with: `No matching export in "@netlify/database/dist/main.js" for
+import "neon"`. I'd guessed the wrong function name — the actual package
+export is `getDatabase()`, not `neon()`. Confirmed against Netlify's
+official API docs:
+
+```js
+import { getDatabase } from '@netlify/database';
+const db = getDatabase();
+const rows = await db.sql`SELECT * FROM users WHERE id = ${id}`;
+```
+
+`lib.js` now uses this correctly. One reassuring thing from that same build
+log: it showed `Provisioning database... completed in 301ms`, confirming
+Netlify DB provisions automatically the moment `@netlify/database` is a
+dependency — no manual database setup needed on your end.
+
 ## What changed
 The old `server.js` was a single always-on Node process — Netlify doesn't run
 that kind of server. This version splits things up:
@@ -62,6 +96,37 @@ this part.
 
 5. **Redeploy**, then check `/admin-login.html` and `/appointment` — slots
    should load and bookings/admin actions should persist across visits now.
+
+## Redeploying this fix
+Since you already have the repo linked to Netlify, just replace the changed
+files in GitHub (same steps as before — upload/overwrite `netlify.toml`,
+`package.json`, and everything under `netlify/functions/`, and delete
+`server.js`, `db.js`, `utils.js` from the repo since they're gone from this
+zip) and commit. Netlify will auto-redeploy.
+
+**After it deploys, check the build log** (Site → Deploys → click the
+deploy → build log) for a line mentioning `api` under "Functions bundling" —
+that confirms the function was actually picked up this time. If it's
+missing, the function file likely isn't in the repo at the right path
+(`netlify/functions/api.js`) — see the GitHub nested-folder upload caveat
+from earlier.
+
+## Testing after every deploy
+`test/test-api.mjs` is a runnable script (needs Node 18+ and internet, run
+it from your own machine) that exercises every endpoint against your live
+URL and prints pass/fail for each:
+
+```
+node test/test-api.mjs https://dr-amit-nichale-dental-clinic.netlify.app
+```
+
+It checks: slots load without a 404, a booking succeeds, double-booking the
+same slot is correctly rejected, the booked slot then shows as unavailable,
+feedback submits, admin login rejects a wrong password and accepts the
+right one, and admin-only routes are blocked without a session and allowed
+with one. Run it after every deploy before trusting the site with real
+patients — if `ADMIN_PASSWORD` was changed from the default, pass it via
+`ADMIN_PASSWORD=yournewpassword node test/test-api.mjs <url>`.
 
 ## One caveat worth knowing
 I built and reviewed this code carefully but couldn't run it against a live

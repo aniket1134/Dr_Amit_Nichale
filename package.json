@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Website + admin dashboard for Dr Amit Nichale's Multispeciality Dental Care (Netlify Functions + Netlify DB build)",
   "scripts": {
-    "start": "node server.js"
+    "test:api": "node test/test-api.mjs"
   },
   "dependencies": {
     "@netlify/database": "^1.0.0"
@@ -12,5 +12,6 @@
     "node": ">=18"
   },
   "license": "UNLICENSED",
-  "private": true
+  "private": true,
+  "type": "module"
 }
