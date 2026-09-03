@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book an Appointment | Dr Amit Nichale's Dental Care</title>
+<link rel="icon" href="/images/logo.jpeg">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-wrap">
+    <a class="brand" href="/index.html">
+      <img src="/images/logo.jpeg" alt="Clinic logo">
+      <span class="brand-text"><strong>Dr Amit Nichale's</strong><span>MULTISPECIALITY DENTAL CARE</span></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+    <nav class="main-nav">
+      <a href="/index.html">Home</a>
+      <a href="/appointment.html">Book Appointment</a>
+      <a href="/feedback.html">Feedback</a>
+      <a href="/location.html">Location</a>
+      <a href="/admin-login.html">Doctor Login</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Schedule your visit</span>
+      <h2>Book an Appointment</h2>
+      <p class="muted">Pick a date, choose an available time slot, and confirm — no account needed.</p>
+    </div>
+
+    <form class="panel" id="apptForm" novalidate>
+      <div class="field">
+        <label for="name">Patient Name</label>
+        <input type="text" id="name" name="name" placeholder="e.g. Priya Sharma" required>
+      </div>
+      <div class="field">
+        <label for="mobile">Mobile Number</label>
+        <input type="tel" id="mobile" name="mobile" placeholder="e.g. 9876543210" required>
+      </div>
+
+      <div class="field">
+        <label>Choose a Date</label>
+        <div class="date-chip-row" id="dateChips"></div>
+        <div class="hint">Or pick any date: <input type="date" id="datePicker" style="width:auto; display:inline-block; margin-left:6px;"></div>
+      </div>
+
+      <div class="field">
+        <label>Choose a Time Slot</label>
+        <div class="slot-grid" id="slotGrid">
+          <p class="muted" id="slotHint">Select a date above to see available slots.</p>
+        </div>
+      </div>
+
+      <input type="hidden" id="selectedDate" name="date">
+      <input type="hidden" id="selectedTime" name="time">
+
+      <button class="btn btn-primary btn-block" type="submit">Confirm Appointment</button>
+      <p class="error-text" id="formError"></p>
+      <div class="success-box" id="successBox"></div>
+      <div class="error-box" id="errorBox"></div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>
+      <h4>Dr Amit Nichale's Dental Care</h4>
+      <p>Farshi Stop, Tank Bazar, near Shirbhate Petrol Pump,<br>Chatrapati Sahu Nagar, Amravati, Maharashtra 444606</p>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <p><a href="/index.html">Home</a><br><a href="/location.html">Location &amp; Map</a></p>
+    </div>
+  </div>
+  <div class="bottom-line">&copy; <span id="year"></span> Dr Amit Nichale's Multispeciality Dental Care.</div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+const dateChipsEl = document.getElementById('dateChips');
+const datePicker = document.getElementById('datePicker');
+const slotGrid = document.getElementById('slotGrid');
+const selectedDateInput = document.getElementById('selectedDate');
+const selectedTimeInput = document.getElementById('selectedTime');
+const formError = document.getElementById('formError');
+const successBox = document.getElementById('successBox');
+const errorBox = document.getElementById('errorBox');
+
+function fmtDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// Build a scrollable strip of the next 14 days as a lightweight "calendar"
+const today = new Date();
+const todayStr = fmtDate(today);
+datePicker.min = todayStr;
+const maxDate = new Date(today); maxDate.setDate(maxDate.getDate() + 60);
+datePicker.max = fmtDate(maxDate);
+
+for (let i = 0; i < 14; i++) {
+  const d = new Date(today);
+  d.setDate(d.getDate() + i);
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'date-chip';
+  chip.dataset.date = fmtDate(d);
+  chip.innerHTML = `<span class="dow">${d.toLocaleDateString(undefined,{weekday:'short'})}</span><span class="dnum">${d.getDate()}</span>`;
+  chip.addEventListener('click', () => selectDate(fmtDate(d), chip));
+  dateChipsEl.appendChild(chip);
+}
+
+datePicker.addEventListener('change', () => {
+  if (datePicker.value) {
+    document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
+    selectDate(datePicker.value, null);
+  }
+});
+
+async function selectDate(dateStr, chipEl) {
+  document.querySelectorAll('.date-chip').forEach(c => c.classList.toggle('selected', c === chipEl));
+  if (!chipEl) datePicker.value = dateStr;
+  selectedDateInput.value = dateStr;
+  selectedTimeInput.value = '';
+  slotGrid.innerHTML = '<p class="muted">Loading slots…</p>';
+  try {
+    const data = await apiRequest(`/api/appointments/slots?date=${encodeURIComponent(dateStr)}`);
+    slotGrid.innerHTML = '';
+    data.all_slots.forEach(slot => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const isBooked = data.booked_slots.includes(slot);
+      btn.className = 'slot-btn' + (isBooked ? ' disabled' : '');
+      btn.textContent = slot;
+      if (!isBooked) {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedTimeInput.value = slot;
+        });
+      } else {
+        btn.disabled = true;
+        btn.title = 'Already booked';
+      }
+      slotGrid.appendChild(btn);
+    });
+  } catch (e) {
+    slotGrid.innerHTML = '<p class="error-text" style="display:block;">Could not load slots. Please try again.</p>';
+  }
+}
+
+document.getElementById('apptForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  formError.style.display = 'none';
+  successBox.style.display = 'none';
+  errorBox.style.display = 'none';
+
+  const name = document.getElementById('name').value.trim();
+  const mobile = document.getElementById('mobile').value.trim();
+  const date = selectedDateInput.value;
+  const time = selectedTimeInput.value;
+
+  if (!name || !mobile || !date || !time) {
+    formError.textContent = 'Please fill your name, mobile number, and pick a date and time slot.';
+    formError.style.display = 'block';
+    return;
+  }
+
+  try {
+    const data = await apiRequest('/api/appointments', {
+      method: 'POST',
+      body: JSON.stringify({ name, mobile, date, time }),
+    });
+    successBox.textContent = data.message;
+    successBox.style.display = 'block';
+    document.getElementById('apptForm').reset();
+    selectedDateInput.value = ''; selectedTimeInput.value = '';
+    slotGrid.innerHTML = '<p class="muted">Select a date above to see available slots.</p>';
+    document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctor Login | Dr Amit Nichale's Dental Care</title>
+<link rel="icon" href="/images/logo.jpeg">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-wrap">
+    <a class="brand" href="/index.html">
+      <img src="/images/logo.jpeg" alt="Clinic logo">
+      <span class="brand-text"><strong>Dr Amit Nichale's</strong><span>MULTISPECIALITY DENTAL CARE</span></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+    <nav class="main-nav">
+      <a href="/index.html">Home</a>
+      <a href="/appointment.html">Book Appointment</a>
+      <a href="/feedback.html">Feedback</a>
+      <a href="/location.html">Location</a>
+      <a href="/admin-login.html">Doctor Login</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Private area</span>
+      <h2>Doctor / Admin Login</h2>
+      <p class="muted">This area is for clinic staff only.</p>
+    </div>
+
+    <form class="panel" id="loginForm" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Log In</button>
+      <div class="error-box" id="errorBox"></div>
+      <p class="hint" style="margin-top:14px;">First time here? Default login is <strong>doctor</strong> / <strong>DrAmit@123</strong> — printed to the server console on first run. Please change it immediately after logging in (Settings tab in the dashboard).</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>
+      <h4>Dr Amit Nichale's Dental Care</h4>
+      <p>Farshi Stop, Tank Bazar, near Shirbhate Petrol Pump,<br>Chatrapati Sahu Nagar, Amravati, Maharashtra 444606</p>
+    </div>
+  </div>
+  <div class="bottom-line">&copy; <span id="year"></span> Dr Amit Nichale's Multispeciality Dental Care.</div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorBox = document.getElementById('errorBox');
+  errorBox.style.display = 'none';
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  try {
+    await apiRequest('/api/admin/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    window.location.href = '/admin-dashboard.html';
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.style.display = 'block';
+  }
+});
+
+// If already logged in, skip straight to dashboard
+apiRequest('/api/admin/session').then(s => { if (s.authenticated) window.location.href = '/admin-dashboard.html'; });
+</script>
+</body>
+</html>

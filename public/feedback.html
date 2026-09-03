@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Feedback | Dr Amit Nichale's Dental Care</title>
+<link rel="icon" href="/images/logo.jpeg">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-wrap">
+    <a class="brand" href="/index.html">
+      <img src="/images/logo.jpeg" alt="Clinic logo">
+      <span class="brand-text"><strong>Dr Amit Nichale's</strong><span>MULTISPECIALITY DENTAL CARE</span></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+    <nav class="main-nav">
+      <a href="/index.html">Home</a>
+      <a href="/appointment.html">Book Appointment</a>
+      <a href="/feedback.html">Feedback</a>
+      <a href="/location.html">Location</a>
+      <a href="/admin-login.html">Doctor Login</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Tell us how we did</span>
+      <h2>Patient Feedback</h2>
+      <p class="muted">Your feedback helps the clinic keep improving. It only takes a minute.</p>
+    </div>
+
+    <form class="panel" id="feedbackForm" novalidate>
+      <div class="field">
+        <label for="fname">Your Name <span class="muted">(optional)</span></label>
+        <input type="text" id="fname" placeholder="e.g. Priya Sharma">
+      </div>
+      <div class="field">
+        <label for="fmobile">Mobile Number <span class="muted">(optional)</span></label>
+        <input type="tel" id="fmobile" placeholder="e.g. 9876543210">
+      </div>
+
+      <div class="field">
+        <label>Overall Experience</label>
+        <div class="pill-options" data-group="overall_experience">
+          <input type="radio" name="overall_experience" id="oe1" value="Excellent"><label for="oe1">Excellent</label>
+          <input type="radio" name="overall_experience" id="oe2" value="Good"><label for="oe2">Good</label>
+          <input type="radio" name="overall_experience" id="oe3" value="Average"><label for="oe3">Average</label>
+          <input type="radio" name="overall_experience" id="oe4" value="Poor"><label for="oe4">Poor</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Staff Friendliness</label>
+        <div class="pill-options" data-group="staff_friendliness">
+          <input type="radio" name="staff_friendliness" id="sf1" value="Very Friendly"><label for="sf1">Very Friendly</label>
+          <input type="radio" name="staff_friendliness" id="sf2" value="Friendly"><label for="sf2">Friendly</label>
+          <input type="radio" name="staff_friendliness" id="sf3" value="Neutral"><label for="sf3">Neutral</label>
+          <input type="radio" name="staff_friendliness" id="sf4" value="Unfriendly"><label for="sf4">Unfriendly</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Clinic Cleanliness</label>
+        <div class="pill-options" data-group="cleanliness">
+          <input type="radio" name="cleanliness" id="cl1" value="Very Clean"><label for="cl1">Very Clean</label>
+          <input type="radio" name="cleanliness" id="cl2" value="Clean"><label for="cl2">Clean</label>
+          <input type="radio" name="cleanliness" id="cl3" value="Needs Improvement"><label for="cl3">Needs Improvement</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Waiting Time</label>
+        <div class="pill-options" data-group="wait_time">
+          <input type="radio" name="wait_time" id="wt1" value="No Wait"><label for="wt1">No Wait</label>
+          <input type="radio" name="wait_time" id="wt2" value="Short Wait"><label for="wt2">Short Wait</label>
+          <input type="radio" name="wait_time" id="wt3" value="Long Wait"><label for="wt3">Long Wait</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Would you recommend us to others?</label>
+        <div class="pill-options" data-group="would_recommend">
+          <input type="radio" name="would_recommend" id="wr1" value="Definitely"><label for="wr1">Definitely</label>
+          <input type="radio" name="would_recommend" id="wr2" value="Maybe"><label for="wr2">Maybe</label>
+          <input type="radio" name="would_recommend" id="wr3" value="No"><label for="wr3">No</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="comments">Additional Comments <span class="muted">(optional)</span></label>
+        <textarea id="comments" rows="4" placeholder="Tell us more..."></textarea>
+      </div>
+
+      <button class="btn btn-primary btn-block" type="submit">Submit Feedback</button>
+      <div class="success-box" id="successBox"></div>
+      <div class="error-box" id="errorBox"></div>
+    </form>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="container text-center">
+    <div class="section-head">
+      <span class="kicker">Public reviews</span>
+      <h2>What Patients Say on Google</h2>
+      <p class="muted">Dr Amit Nichale's Multispeciality Dental Care (Deepshobha Multispeciality Dental Clinic)</p>
+    </div>
+    <a class="chip-link" href="https://www.google.com/maps/place/Dr+Amit+Nichale's+Multispeciality+Dental+Care+(Deepshobha+Multispeciality+Dental+Clinic),+Farshi+Stop,+Tank+Bazar,+near+Shirbhate+Petrol+Pump,+Chatrapati+Sahu+Nagar,+Amravati,+Maharashtra+444606/data=!4m2!3m1!1s0x3bd6a4a5dc3b8fc3:0xf83ee57c2bf9d586!18m1!1e1" target="_blank" rel="noopener">
+      ⭐ Read &amp; Write Reviews on Google
+    </a>
+    <p class="hint" style="margin-top:14px;">Google reviews can't be embedded directly on external sites without a paid Places API key. This button links straight to the clinic's live Google Business reviews. <a href="/README.md" target="_blank">See README</a> for how to enable an embedded review widget if you get an API key.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>
+      <h4>Dr Amit Nichale's Dental Care</h4>
+      <p>Farshi Stop, Tank Bazar, near Shirbhate Petrol Pump,<br>Chatrapati Sahu Nagar, Amravati, Maharashtra 444606</p>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <p><a href="/index.html">Home</a><br><a href="/appointment.html">Book Appointment</a></p>
+    </div>
+  </div>
+  <div class="bottom-line">&copy; <span id="year"></span> Dr Amit Nichale's Multispeciality Dental Care.</div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const successBox = document.getElementById('successBox');
+  const errorBox = document.getElementById('errorBox');
+  successBox.style.display = 'none';
+  errorBox.style.display = 'none';
+
+  const getVal = (name) => {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : '';
+  };
+
+  const payload = {
+    patient_name: document.getElementById('fname').value.trim(),
+    mobile: document.getElementById('fmobile').value.trim(),
+    overall_experience: getVal('overall_experience'),
+    staff_friendliness: getVal('staff_friendliness'),
+    cleanliness: getVal('cleanliness'),
+    wait_time: getVal('wait_time'),
+    would_recommend: getVal('would_recommend'),
+    comments: document.getElementById('comments').value.trim(),
+  };
+
+  try {
+    const data = await apiRequest('/api/feedback', { method: 'POST', body: JSON.stringify(payload) });
+    successBox.textContent = data.message;
+    successBox.style.display = 'block';
+    document.getElementById('feedbackForm').reset();
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

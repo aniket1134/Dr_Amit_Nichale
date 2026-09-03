@@ -1,0 +1,16 @@
+{
+  "name": "dr-amit-nichale-dental-clinic",
+  "version": "2.0.0",
+  "description": "Website + admin dashboard for Dr Amit Nichale's Multispeciality Dental Care (Netlify Functions + Netlify DB build)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@netlify/database": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Location &amp; Directions | Dr Amit Nichale's Dental Care</title>
+<link rel="icon" href="/images/logo.jpeg">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-wrap">
+    <a class="brand" href="/index.html">
+      <img src="/images/logo.jpeg" alt="Clinic logo">
+      <span class="brand-text"><strong>Dr Amit Nichale's</strong><span>MULTISPECIALITY DENTAL CARE</span></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+    <nav class="main-nav">
+      <a href="/index.html">Home</a>
+      <a href="/appointment.html">Book Appointment</a>
+      <a href="/feedback.html">Feedback</a>
+      <a href="/location.html">Location</a>
+      <a href="/admin-login.html">Doctor Login</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Find us</span>
+      <h2>Clinic Location</h2>
+    </div>
+
+    <div class="two-col" style="align-items: start;">
+      <div>
+        <iframe class="map-embed"
+          src="https://www.google.com/maps?q=Dr+Amit+Nichale%27s+Multispeciality+Dental+Care+Farshi+Stop+Tank+Bazar+Amravati+444606&output=embed"
+          loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Clinic location map"></iframe>
+        <p class="hint">Map shown without a Google Maps API key. For a smoother, branded embed, add a Maps Embed API key — see README.</p>
+      </div>
+
+      <div class="card">
+        <h3>Dr Amit Nichale's Multispeciality Dental Care</h3>
+        <p class="muted">(Deepshobha Multispeciality Dental Clinic)</p>
+        <p>
+          Farshi Stop, Tank Bazar,<br>
+          near Shirbhate Petrol Pump,<br>
+          Chatrapati Sahu Nagar,<br>
+          Amravati, Maharashtra 444606
+        </p>
+
+        <div class="stack">
+          <a class="btn btn-primary btn-block" id="directionsBtn"
+             href="https://www.google.com/maps/place/Dr+Amit+Nichale's+Multispeciality+Dental+Care+(Deepshobha+Multispeciality+Dental+Clinic),+Farshi+Stop,+Tank+Bazar,+near+Shirbhate+Petrol+Pump,+Chatrapati+Sahu+Nagar,+Amravati,+Maharashtra+444606/data=!4m2!3m1!1s0x3bd6a4a5dc3b8fc3:0xf83ee57c2bf9d586!18m1!1e1"
+             target="_blank" rel="noopener">Open in Google Maps</a>
+
+          <button class="btn btn-outline btn-block" id="copyLinkBtn" type="button">📋 Copy Shareable Link</button>
+
+          <a class="btn btn-secondary btn-block" id="whatsappBtn" target="_blank" rel="noopener">💬 Share via WhatsApp</a>
+
+          <a class="btn btn-outline btn-block" id="emailBtn">✉️ Share via Email</a>
+        </div>
+        <p class="success-box" id="copyMsg" style="display:none;">Link copied to clipboard!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>
+      <h4>Dr Amit Nichale's Dental Care</h4>
+      <p>Farshi Stop, Tank Bazar, near Shirbhate Petrol Pump,<br>Chatrapati Sahu Nagar, Amravati, Maharashtra 444606</p>
+    </div>
+    <div>
+      <h4>Quick Links</h4>
+      <p><a href="/index.html">Home</a><br><a href="/appointment.html">Book Appointment</a></p>
+    </div>
+  </div>
+  <div class="bottom-line">&copy; <span id="year"></span> Dr Amit Nichale's Multispeciality Dental Care.</div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+const shareUrl = document.getElementById('directionsBtn').href;
+const shareText = `Visit Dr Amit Nichale's Multispeciality Dental Care: ${shareUrl}`;
+
+document.getElementById('whatsappBtn').href = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+document.getElementById('emailBtn').href = `mailto:?subject=${encodeURIComponent("Dr Amit Nichale's Dental Care - Location")}&body=${encodeURIComponent(shareText)}`;
+
+document.getElementById('copyLinkBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    const msg = document.getElementById('copyMsg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 2500);
+  } catch (e) {
+    prompt('Copy this link:', shareUrl);
+  }
+});
+</script>
+</body>
+</html>

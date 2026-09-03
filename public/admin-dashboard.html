@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | Dr Amit Nichale's Dental Care</title>
+<link rel="icon" href="/images/logo.jpeg">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .dash-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+  .dash-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 22px; flex-wrap: wrap; }
+  .tab-btn { background: #fff; border: 1.5px solid var(--border); border-radius: 999px; padding: 9px 18px; cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--navy); }
+  .tab-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filters input { padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border); min-width: 200px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(20,25,30,.55); display: none; align-items: flex-start; justify-content: center; z-index: 200; overflow-y: auto; padding: 30px 14px; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #fff; border-radius: var(--radius); max-width: 780px; width: 100%; padding: 28px; box-shadow: var(--shadow); }
+  .modal-box h3 { margin-top: 0; }
+  .modal-close { float: right; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); }
+  .detail-section { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
+  .detail-section h4 { margin: 0 0 10px; color: var(--navy); }
+  .payments-list, .reports-list { list-style: none; margin: 0; padding: 0; }
+  .payments-list li, .reports-list li { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: .92rem; gap: 8px; }
+  .total-fees { font-size: 1.3rem; font-weight: 700; color: var(--success); }
+  .inline-form { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .inline-form input { flex: 1; min-width: 120px; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--border); }
+  .loading-msg { padding: 30px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-wrap">
+    <a class="brand" href="/index.html">
+      <img src="/images/logo.jpeg" alt="Clinic logo">
+      <span class="brand-text"><strong>Dr Amit Nichale's</strong><span>ADMIN DASHBOARD</span></span>
+    </a>
+    <button class="btn btn-outline light btn-small" id="logoutBtn">Log Out</button>
+  </div>
+</header>
+
+<div class="dash-wrap">
+  <div class="dash-top">
+    <div>
+      <h2 style="margin-bottom:2px;">Welcome, <span id="whoami">Doctor</span></h2>
+      <p class="muted" style="margin:0;">Patient records, appointments, and feedback in one place.</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="patients">Patients</button>
+    <button class="tab-btn" data-tab="appointments">Appointments</button>
+    <button class="tab-btn" data-tab="feedback">Feedback</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </div>
+
+  <!-- PATIENTS TAB -->
+  <div class="tab-panel active" id="tab-patients">
+    <div class="filters">
+      <input type="text" id="filterName" placeholder="Filter by patient name">
+      <input type="text" id="filterMobile" placeholder="Filter by mobile number">
+      <button class="btn btn-secondary btn-small" id="filterBtn">Search</button>
+      <button class="btn btn-outline btn-small" id="clearFilterBtn">Clear</button>
+      <button class="btn btn-primary btn-small" id="addPatientBtn" style="margin-left:auto;">+ Add Patient</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="patientsTable">
+        <thead><tr><th>Name</th><th>Mobile</th><th>Registered</th><th>Total Fees Received</th><th></th></tr></thead>
+        <tbody><tr><td colspan="5" class="loading-msg">Loading patients…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- APPOINTMENTS TAB -->
+  <div class="tab-panel" id="tab-appointments">
+    <div class="filters">
+      <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="upcomingOnly" checked> Upcoming only</label>
+      <button class="btn btn-secondary btn-small" id="refreshApptBtn">Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="apptTable">
+        <thead><tr><th>Date</th><th>Time</th><th>Name</th><th>Mobile</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody><tr><td colspan="6" class="loading-msg">Loading appointments…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FEEDBACK TAB -->
+  <div class="tab-panel" id="tab-feedback">
+    <div class="table-wrap">
+      <table class="data-table" id="feedbackTable">
+        <thead><tr><th>Date</th><th>Name</th><th>Mobile</th><th>Overall</th><th>Staff</th><th>Cleanliness</th><th>Wait</th><th>Recommend</th><th>Comments</th></tr></thead>
+        <tbody><tr><td colspan="9" class="loading-msg">Loading feedback…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="tab-panel" id="tab-settings">
+    <form class="panel" id="pwForm" style="margin:0;">
+      <h3 class="mt-0">Change Password</h3>
+      <div class="field"><label>Current Password</label><input type="password" id="curPw" required></div>
+      <div class="field"><label>New Password</label><input type="password" id="newPw" required minlength="6"></div>
+      <button class="btn btn-primary" type="submit">Update Password</button>
+      <div class="success-box" id="pwSuccess"></div>
+      <div class="error-box" id="pwError"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD PATIENT MODAL -->
+<div class="modal-overlay" id="addPatientModal">
+  <div class="modal-box">
+    <button class="modal-close" data-close="addPatientModal">&times;</button>
+    <h3>Add New Patient</h3>
+    <form id="addPatientForm">
+      <div class="field"><label>Name</label><input type="text" id="newPatientName" required></div>
+      <div class="field"><label>Mobile Number</label><input type="tel" id="newPatientMobile" required></div>
+      <button class="btn btn-primary" type="submit">Add Patient</button>
+      <div class="error-box" id="addPatientError"></div>
+    </form>
+  </div>
+</div>
+
+<!-- PATIENT DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-box" style="max-width: 860px;">
+    <button class="modal-close" data-close="detailModal">&times;</button>
+    <h3 id="detailName">Patient</h3>
+    <p class="muted" id="detailMobile"></p>
+    <p class="total-fees">Total Fees Received: ₹<span id="detailTotal">0</span></p>
+
+    <div class="detail-section">
+      <h4>Clinical Record</h4>
+      <form id="clinicalForm">
+        <div class="field"><label>Clinical Examination</label><textarea id="examNotes" rows="3"></textarea></div>
+        <div class="field"><label>Diagnosis / Investigation</label><textarea id="diagnosis" rows="3"></textarea></div>
+        <div class="field"><label>Treatment Advice</label><textarea id="treatmentAdvice" rows="3"></textarea></div>
+        <button class="btn btn-secondary btn-small" type="submit">Save Clinical Record</button>
+        <span class="success-box" id="clinicalSuccess" style="display:none; padding:6px 12px;">Saved!</span>
+      </form>
+    </div>
+
+    <div class="detail-section">
+      <h4>Payments</h4>
+      <ul class="payments-list" id="paymentsList"></ul>
+      <form class="inline-form" id="paymentForm">
+        <input type="number" step="0.01" min="0.01" id="paymentAmount" placeholder="Amount received" required>
+        <input type="text" id="paymentNote" placeholder="Note (optional)">
+        <button class="btn btn-primary btn-small" type="submit">Add Payment</button>
+      </form>
+    </div>
+
+    <div class="detail-section">
+      <h4>Reports (X-rays &amp; documents)</h4>
+      <ul class="reports-list" id="reportsList"></ul>
+      <form class="inline-form" id="reportForm">
+        <input type="file" id="reportFile" accept="image/*,.pdf" required>
+        <button class="btn btn-primary btn-small" type="submit">Upload Report</button>
+      </form>
+      <p class="hint">Accepted: images and PDFs, up to ~20MB.</p>
+    </div>
+
+    <div class="detail-section">
+      <h4>Appointment History</h4>
+      <ul class="payments-list" id="apptHistoryList"></ul>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script>
+let currentPatientId = null;
+
+// ---- Auth guard ----
+(async function guard() {
+  try {
+    const s = await apiRequest('/api/admin/session');
+    if (!s.authenticated) { window.location.href = '/admin-login.html'; return; }
+    document.getElementById('whoami').textContent = s.username;
+    loadPatients();
+  } catch (e) { window.location.href = '/admin-login.html'; }
+})();
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await apiRequest('/api/admin/logout', { method: 'POST' });
+  window.location.href = '/admin-login.html';
+});
+
+// ---- Tabs ----
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'appointments') loadAppointments();
+    if (btn.dataset.tab === 'feedback') loadFeedback();
+  });
+});
+
+// ---- Modal helpers ----
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('open'); });
+});
+
+// ---- Patients ----
+async function loadPatients() {
+  const name = document.getElementById('filterName').value.trim();
+  const mobile = document.getElementById('filterMobile').value.trim();
+  const params = new URLSearchParams();
+  if (name) params.set('name', name);
+  if (mobile) params.set('mobile', mobile);
+  const tbody = document.querySelector('#patientsTable tbody');
+  tbody.innerHTML = '<tr><td colspan="5" class="loading-msg">Loading…</td></tr>';
+  try {
+    const data = await apiRequest('/api/admin/patients?' + params.toString());
+    if (data.patients.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="loading-msg">No patients found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.patients.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.mobile)}</td>
+        <td>${p.created_at}</td><td>₹${p.total_fees_received.toFixed(2)}</td>
+        <td><button class="btn btn-outline btn-small view-patient" data-id="${p.id}">View</button></td>`;
+      tbody.appendChild(tr);
+    });
+    document.querySelectorAll('.view-patient').forEach(btn => {
+      btn.addEventListener('click', () => openPatientDetail(btn.dataset.id));
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" class="loading-msg">${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+document.getElementById('filterBtn').addEventListener('click', loadPatients);
+document.getElementById('clearFilterBtn').addEventListener('click', () => {
+  document.getElementById('filterName').value = '';
+  document.getElementById('filterMobile').value = '';
+  loadPatients();
+});
+document.getElementById('addPatientBtn').addEventListener('click', () => {
+  document.getElementById('addPatientForm').reset();
+  document.getElementById('addPatientError').style.display = 'none';
+  openModal('addPatientModal');
+});
+document.getElementById('addPatientForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errBox = document.getElementById('addPatientError');
+  errBox.style.display = 'none';
+  try {
+    await apiRequest('/api/admin/patients', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: document.getElementById('newPatientName').value.trim(),
+        mobile: document.getElementById('newPatientMobile').value.trim(),
+      }),
+    });
+    closeModal('addPatientModal');
+    loadPatients();
+  } catch (err) {
+    errBox.textContent = err.message;
+    errBox.style.display = 'block';
+  }
+});
+
+async function openPatientDetail(id) {
+  currentPatientId = id;
+  try {
+    const data = await apiRequest(`/api/admin/patients/${id}`);
+    document.getElementById('detailName').textContent = data.patient.name;
+    document.getElementById('detailMobile').textContent = data.patient.mobile;
+    document.getElementById('detailTotal').textContent = data.total_fees_received.toFixed(2);
+    document.getElementById('examNotes').value = data.clinical.examination_notes || '';
+    document.getElementById('diagnosis').value = data.clinical.diagnosis || '';
+    document.getElementById('treatmentAdvice').value = data.clinical.treatment_advice || '';
+
+    const paymentsList = document.getElementById('paymentsList');
+    paymentsList.innerHTML = data.payments.length ? '' : '<li class="muted">No payments recorded yet.</li>';
+    data.payments.forEach(p => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>₹${p.amount.toFixed(2)} ${p.note ? '- ' + escapeHtml(p.note) : ''}</span><span class="muted">${p.paid_at}</span>`;
+      paymentsList.appendChild(li);
+    });
+
+    const reportsList = document.getElementById('reportsList');
+    reportsList.innerHTML = data.reports.length ? '' : '<li class="muted">No reports uploaded yet.</li>';
+    data.reports.forEach(r => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span><a href="/api/admin/reports/${r.id}/file" target="_blank">${escapeHtml(r.original_name)}</a> <span class="muted">(${(r.size_bytes/1024).toFixed(0)} KB)</span></span>
+        <button class="btn btn-danger btn-small delete-report" data-id="${r.id}">Delete</button>`;
+      reportsList.appendChild(li);
+    });
+    document.querySelectorAll('.delete-report').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this report?')) return;
+        await apiRequest(`/api/admin/reports/${btn.dataset.id}`, { method: 'DELETE' });
+        openPatientDetail(currentPatientId);
+      });
+    });
+
+    const apptList = document.getElementById('apptHistoryList');
+    apptList.innerHTML = data.appointments.length ? '' : '<li class="muted">No appointment history.</li>';
+    data.appointments.forEach(a => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${a.appointment_date} at ${a.appointment_time}</span><span class="badge ${a.status}">${a.status}</span>`;
+      apptList.appendChild(li);
+    });
+
+    openModal('detailModal');
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+document.getElementById('clinicalForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await apiRequest(`/api/admin/patients/${currentPatientId}/clinical`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        examination_notes: document.getElementById('examNotes').value,
+        diagnosis: document.getElementById('diagnosis').value,
+        treatment_advice: document.getElementById('treatmentAdvice').value,
+      }),
+    });
+    const s = document.getElementById('clinicalSuccess');
+    s.style.display = 'inline-block';
+    setTimeout(() => s.style.display = 'none', 2000);
+  } catch (err) { alert(err.message); }
+});
+
+document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await apiRequest(`/api/admin/patients/${currentPatientId}/payments`, {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: document.getElementById('paymentAmount').value,
+        note: document.getElementById('paymentNote').value,
+      }),
+    });
+    document.getElementById('paymentForm').reset();
+    openPatientDetail(currentPatientId);
+    loadPatients();
+  } catch (err) { alert(err.message); }
+});
+
+document.getElementById('reportForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fileInput = document.getElementById('reportFile');
+  const file = fileInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const base64 = reader.result.split(',')[1];
+    try {
+      await apiRequest(`/api/admin/patients/${currentPatientId}/reports`, {
+        method: 'POST',
+        body: JSON.stringify({ filename: file.name, mime_type: file.type, base64_data: base64 }),
+      });
+      fileInput.value = '';
+      openPatientDetail(currentPatientId);
+    } catch (err) { alert(err.message); }
+  };
+  reader.readAsDataURL(file);
+});
+
+// ---- Appointments ----
+async function loadAppointments() {
+  const tbody = document.querySelector('#apptTable tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading-msg">Loading…</td></tr>';
+  const upcoming = document.getElementById('upcomingOnly').checked ? '1' : '0';
+  try {
+    const data = await apiRequest(`/api/admin/appointments?upcoming=${upcoming}`);
+    if (data.appointments.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="loading-msg">No appointments found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.appointments.forEach(a => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${a.appointment_date}</td><td>${a.appointment_time}</td>
+        <td>${escapeHtml(a.name)}</td><td>${escapeHtml(a.mobile)}</td>
+        <td><span class="badge ${a.status}">${a.status}</span></td>
+        <td>
+          ${a.patient_id ? '' : `<button class="btn btn-outline btn-small link-appt" data-id="${a.id}">Link to Patient</button>`}
+          <select class="status-select" data-id="${a.id}" style="margin-left:6px;">
+            <option value="booked" ${a.status==='booked'?'selected':''}>Booked</option>
+            <option value="completed" ${a.status==='completed'?'selected':''}>Completed</option>
+            <option value="cancelled" ${a.status==='cancelled'?'selected':''}>Cancelled</option>
+          </select>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+    document.querySelectorAll('.link-appt').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await apiRequest(`/api/admin/appointments/${btn.dataset.id}/link`, { method: 'POST', body: JSON.stringify({}) });
+          loadAppointments(); loadPatients();
+        } catch (e) { alert(e.message); }
+      });
+    });
+    document.querySelectorAll('.status-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        try {
+          await apiRequest(`/api/admin/appointments/${sel.dataset.id}/status`, { method: 'POST', body: JSON.stringify({ status: sel.value }) });
+          loadAppointments();
+        } catch (e) { alert(e.message); }
+      });
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" class="loading-msg">${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+document.getElementById('refreshApptBtn').addEventListener('click', loadAppointments);
+document.getElementById('upcomingOnly').addEventListener('change', loadAppointments);
+
+// ---- Feedback ----
+async function loadFeedback() {
+  const tbody = document.querySelector('#feedbackTable tbody');
+  tbody.innerHTML = '<tr><td colspan="9" class="loading-msg">Loading…</td></tr>';
+  try {
+    const data = await apiRequest('/api/admin/feedback');
+    if (data.feedback.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="loading-msg">No feedback submitted yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.feedback.forEach(f => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${f.created_at}</td><td>${escapeHtml(f.patient_name||'-')}</td><td>${escapeHtml(f.mobile||'-')}</td>
+        <td>${escapeHtml(f.overall_experience||'-')}</td><td>${escapeHtml(f.staff_friendliness||'-')}</td>
+        <td>${escapeHtml(f.cleanliness||'-')}</td><td>${escapeHtml(f.wait_time||'-')}</td>
+        <td>${escapeHtml(f.would_recommend||'-')}</td><td>${escapeHtml(f.comments||'-')}</td>`;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="9" class="loading-msg">${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+
+// ---- Settings ----
+document.getElementById('pwForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const success = document.getElementById('pwSuccess');
+  const error = document.getElementById('pwError');
+  success.style.display = 'none'; error.style.display = 'none';
+  try {
+    await apiRequest('/api/admin/change-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        current_password: document.getElementById('curPw').value,
+        new_password: document.getElementById('newPw').value,
+      }),
+    });
+    success.textContent = 'Password updated successfully.';
+    success.style.display = 'block';
+    document.getElementById('pwForm').reset();
+  } catch (err) {
+    error.textContent = err.message;
+    error.style.display = 'block';
+  }
+});
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+</script>
+</body>
+</html>
